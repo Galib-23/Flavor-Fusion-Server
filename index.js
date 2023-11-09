@@ -62,12 +62,19 @@ async function run() {
             res.send(result);
         });
 
-        app.delete('/carts/:id', async(req, res) => {
+        app.get('/foods/:id', async(req, res) => {
             const id = req.params.id;
             const query = {_id: new ObjectId(id)}
-            const result = await cartCollection.deleteOne(query);
+            const result = await foodCollection.findOne(query);
             res.send(result);
           })
+
+        app.delete('/carts/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) }
+            const result = await cartCollection.deleteOne(query);
+            res.send(result);
+        })
 
         app.post('/users', async (req, res) => {
             const newUser = req.body;
@@ -81,12 +88,36 @@ async function run() {
             const result = await cartCollection.insertOne(newCart);
             res.send(result);
         })
-        app.post('/foods', async(req, res) =>{
+        app.post('/foods', async (req, res) => {
             const newFood = req.body;
             console.log(newFood);
             const result = await foodCollection.insertOne(newFood);
             res.send(result);
-          })
+        })
+
+        app.put('/foods/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) }
+            const options = { upsert: true };
+            const updatedFood = req.body;
+            const food = {
+                $set: {
+                    food_name: updatedFood.food_name,
+                    food_image: updatedFood.food_image,
+                    food_category: updatedFood.food_category,
+                    quantity: updatedFood.quantity,
+                    price: updatedFood.price,
+                    add_by: updatedFood.add_by,
+                    food_origin: updatedFood.food_origin,
+                    description: updatedFood.description,
+                    count: updatedFood.count,
+                }
+            }
+
+            const result = await foodCollection.updateOne(filter, food, options);
+            res.send(result);
+
+        })
 
         // Send a ping to confirm a successful connection
         //await client.db("admin").command({ ping: 1 });
