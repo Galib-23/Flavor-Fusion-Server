@@ -4,7 +4,6 @@ const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
 require('dotenv').config()
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
-const cookieParser = require('cookie-parser');
 const app = express();
 const port = process.env.PORT || 5000;
 
@@ -33,6 +32,26 @@ const client = new MongoClient(uri, {
         deprecationErrors: true,
     }
 });
+
+//middlewares
+const logger = (req, res ,next) =>{
+    console.log(req.method, req.url);
+    next();
+}
+
+const verifyToken = (req, res, next) =>{
+    const token = req.cookies?.token;
+    if(!token){
+        return res.status(401).send({message: 'unauthorized access'});
+    }
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded)=>{
+        if(err){
+            return res.status(401).send({message: 'unatuhorized access'})
+        }
+        req.user = decoded;
+        next();
+    })
+}
 
 async function run() {
     try {
@@ -66,8 +85,8 @@ async function run() {
             res.send(result);
         });
 
-        app.get('/carts', async (req, res) => {
-            const cursor = cartCollection.find();
+        app.get('/carts', logger, verifyToken, async (req, res) => {
+            const cursor = cartCollection.find(); 
             const result = await cursor.toArray();
             res.send(result);
         });
@@ -104,7 +123,7 @@ async function run() {
             const result = await foodCollection.insertOne(newFood);
             res.send(result);
         })
-        app.post('/jwt', async (req, res) =>{
+        app.post('/jwt', verifyToken, async (req, res) =>{
             const user = req.body;
             console.log("user: ", user);
             const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {expiresIn: '2h'} )
