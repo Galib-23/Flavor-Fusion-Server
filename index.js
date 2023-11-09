@@ -10,7 +10,8 @@ const port = process.env.PORT || 5000;
 
 app.use(cors({
     origin: [
-        'http://localhost:5173'
+        'https://flavor-fusion-2538c.web.app',
+        'https://flavor-fusion-2538c.firebaseapp.com'
     ],
     credentials: true
 }));
@@ -94,7 +95,7 @@ async function run() {
             res.send(result);
         });
 
-        app.get('/carts', verifyToken, async (req, res) => {
+        app.get('/carts', async (req, res) => {
             // if(req.user.email !== req.query.email){
             //     return res.status(403).send({message: 'forbidden access'})
             // }
