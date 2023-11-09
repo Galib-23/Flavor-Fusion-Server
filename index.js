@@ -180,7 +180,6 @@ async function run() {
         //await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
     } finally {
-        // Ensures that the client will close when you finish/error
         //await client.close();
     }
 }
@@ -193,5 +192,5 @@ app.get('/', (req, res) => {
 })
 
 app.listen(port, () => {
-    console.log(`Fusion flavor is running on port ${port}`)
+    console.log(`Fusion flavor server is running on port ${port}`)
 })
