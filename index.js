@@ -68,10 +68,19 @@ async function run() {
             res.send(result);
         });
         app.get('/all-foods', async (req, res) => {
-            const cursor = foodCollection.find();
-            const result = await cursor.toArray();
+            const page = parseInt(req.query.page);
+            const size = parseInt(req.query.size);
+            console.log("page is: ",page, size);
+            const result = await foodCollection.find()
+            .skip(page * size)
+            .limit(size)
+            .toArray();
             res.send(result);
         });
+        app.get('/foodsCount', async(req, res) =>{
+            const count = await foodCollection.estimatedDocumentCount();
+            res.send({count});
+        })
         app.get('/foods/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) };
@@ -85,7 +94,10 @@ async function run() {
             res.send(result);
         });
 
-        app.get('/carts', logger, verifyToken, async (req, res) => {
+        app.get('/carts', verifyToken, async (req, res) => {
+            // if(req.user.email !== req.query.email){
+            //     return res.status(403).send({message: 'forbidden access'})
+            // }
             const cursor = cartCollection.find(); 
             const result = await cursor.toArray();
             res.send(result);
